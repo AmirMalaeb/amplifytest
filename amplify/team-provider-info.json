@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-newamir-dev-d6665-authRole",
+      "UnauthRoleArn": "arn:aws:iam::381492082852:role/amplify-newamir-dev-d6665-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::381492082852:role/amplify-newamir-dev-d6665-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-newamir-dev-d6665-deployment",
+      "UnauthRoleName": "amplify-newamir-dev-d6665-unauthRole",
+      "StackName": "amplify-newamir-dev-d6665",
+      "StackId": "arn:aws:cloudformation:us-east-1:381492082852:stack/amplify-newamir-dev-d6665/ceb24800-41ae-11ef-a82f-0e7b10f87c81",
+      "AmplifyAppId": "d7bz70gh470ou"
+    },
+    "categories": {
+      "auth": {
+        "newamir6d4260cd": {}
+      }
+    }
+  }
+}
