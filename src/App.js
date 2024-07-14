@@ -1,146 +1,120 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
 import {
   Button,
   Flex,
   Heading,
-  Text,
   TextField,
   Image,
   View,
   Card,
-  Divider,
   withAuthenticator,
 } from "@aws-amplify/ui-react";
-import { listNotes } from "./graphql/queries";
-import {
-  createNote as createNoteMutation,
-  deleteNote as deleteNoteMutation,
-} from "./graphql/mutations";
 import { generateClient } from 'aws-amplify/api';
 import { uploadData, getUrl, remove } from 'aws-amplify/storage';
 
 const client = generateClient();
 
 const App = ({ signOut }) => {
-  const [notes, setNotes] = useState([]);
+  const [file, setFile] = useState(null);
+  const [imageKey, setImageKey] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [message, setMessage] = useState('');
+  const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+  const sanitizeFileName = (fileName) => {
+    return fileName.replace(/[^a-zA-Z0-9-_\.]/g, '_');
+  };
 
-  async function fetchNotes() {
-    const apiData = await client.graphql({ query: listNotes });
-    const notesFromAPI = apiData.data.listNotes.items;
-    await Promise.all(
-      notesFromAPI.map(async (note) => {
-        if (note.image) {
-          const url = await getUrl({ key: note.name });
-          note.image = url.url;  
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (file) {
+      const originalName = sanitizeFileName(file.name);
+      console.log(`Uploading file with key: ${originalName} and content type: ${file.type}`);
+      
+      try {
+        await uploadData({
+          key: originalName,
+          data: file,
+          contentType: file.type
+        });
+
+        const url = await getUrl({ key: originalName });
+        setImageKey(originalName);
+        setImageUrl(url.url);
+        setFile(null);
+        setMessage(`Uploaded successfully: ${originalName}`);
+        // Reset the file input field
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
-        return note;
-      })
-    );
-    setNotes(notesFromAPI);
-  }
+      } catch (error) {
+        console.error("Error uploading file: ", error);
+        setMessage('Error uploading file');
+      }
+    }
+  };
 
-  async function createNote(event) {
-    event.preventDefault();
-    const form = new FormData(event.target);
-    const image = form.get("image");
-    const data = {
-      name: form.get("name"),
-      description: form.get("description"),
-      image: image.name,
-    };
-    if (!!data.image) await uploadData({
-      key: data.name,
-      data: image
-    });
-    await client.graphql({
-      query: createNoteMutation,
-      variables: { input: data },
-    });
-    fetchNotes();
-    event.target.reset();
-  }
-
-  async function deleteNote({ id, name }) {
-    const newNotes = notes.filter((note) => note.id !== id);
-    setNotes(newNotes);
-    await remove({ key: name });
-    await client.graphql({
-      query: deleteNoteMutation,
-      variables: { input: { id } },
-    });
-  }
+  const handleRemove = async () => {
+    if (imageKey) {
+      try {
+        await remove({ key: imageKey });
+        setImageKey(null);
+        setImageUrl(null);
+        setMessage('Image removed successfully');
+      } catch (error) {
+        console.error("Error removing file: ", error);
+        setMessage('Error removing file');
+      }
+    }
+  };
 
   return (
     <View className="App">
       <Heading level={1} textAlign="center" margin="2rem">
-        My Notes App
+        Image Upload App
       </Heading>
-      <Card variation="elevated" padding="2rem" maxWidth="800px" margin="0 auto">
-        <Heading level={3} margin="1rem 0">Create a New Note</Heading>
-        <View as="form" margin="3rem 0" onSubmit={createNote}>
-          <Flex direction="column" gap="1rem">
-            <TextField
-              name="name"
-              placeholder="Note Name"
-              label="Note Name"
-              labelHidden
-              variation="quiet"
-              required
-            />
-            <TextField
-              name="description"
-              placeholder="Note Description"
-              label="Note Description"
-              labelHidden
-              variation="quiet"
-              required
-            />
-            <View
-              name="image"
-              as="input"
+      <Card variation="elevated" padding="2rem" maxWidth="600px" margin="0 auto">
+        <Flex direction="column" gap="1rem" alignItems="center">
+          <label className="file-input-label">
+            Choose Image
+            <input
               type="file"
-              style={{ alignSelf: "start" }}
+              onChange={handleFileChange}
+              ref={fileInputRef}
             />
-            <Button type="submit" variation="primary">
-              Create Note
+          </label>
+          {file && (
+            <Button onClick={handleUpload} variation="primary">
+              Upload Image
             </Button>
-          </Flex>
-        </View>
+          )}
+          {imageUrl && (
+            <div className="image-container">
+              <Image
+                src={imageUrl}
+                alt="Uploaded file"
+                style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}
+              />
+            </div>
+          )}
+          {imageKey && (
+            <Button onClick={handleRemove} variation="link" color="red">
+              Remove Image
+            </Button>
+          )}
+          {message && (
+            <p className="message">{message}</p>
+          )}
+        </Flex>
       </Card>
-      <Heading level={2} textAlign="center" margin="2rem">
-        Current Notes
-      </Heading>
-      <View margin="3rem 0" maxWidth="800px" margin="0 auto">
-        {notes.map((note) => (
-          <Card key={note.id || note.name} variation="outlined" margin="1rem 0">
-            <Flex direction="column" padding="1rem" gap="1rem">
-              <Text as="strong" fontWeight={700} fontSize="1.5rem">
-                {note.name}
-              </Text>
-              <Text as="span">{note.description}</Text>
-              {note.image && (
-                <Image
-                  src={note.image}
-                  alt={`visual aid for ${note.name}`}
-                  style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}
-                />
-              )}
-              <Divider />
-              <Flex justifyContent="space-between">
-                <Button variation="link" onClick={() => deleteNote(note)}>
-                  Delete note
-                </Button>
-              </Flex>
-            </Flex>
-          </Card>
-        ))}
-      </View>
       <Flex justifyContent="center" margin="2rem 0">
         <Button onClick={signOut} variation="primary">
           Sign Out

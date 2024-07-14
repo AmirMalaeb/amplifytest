@@ -1,5 +1,16 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
 .App {
   text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f4f4f4;
 }
 
 .App-logo {
@@ -10,6 +21,15 @@
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -28,22 +48,57 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-.App {
-  font-family: Arial, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
+/* Card Styles */
+.Card {
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
   padding: 2rem;
-  background-color: #f4f4f4;
+  max-width: 600px;
+  margin: 1rem auto;
 }
 
+input[type="file"] {
+  display: none;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 2px solid #007bff;
+  color: #007bff;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.file-input-label:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.image-container {
+  max-width: 100%;
+  max-height: 400px;
+  margin-bottom: 1rem;
+}
+
+.image-container img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Message Styles */
+.message {
+  font-size: 1rem;
+  color: green;
+  margin-top: 1rem;
+}
+
+/* Button Styles */
 button {
   background-color: #007bff;
   color: white;
@@ -51,8 +106,36 @@ button {
   padding: 0.5rem 1rem;
   border-radius: 5px;
   cursor: pointer;
+  margin: 0.5rem;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
   background-color: #0056b3;
+}
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .App {
+    padding: 1rem;
+  }
+  
+  .Card {
+    padding: 1rem;
+  }
+  
+  .file-input-label {
+    padding: 0.5rem;
+  }
+
+  button {
+    padding: 0.5rem;
+  }
 }
