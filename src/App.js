@@ -79,7 +79,7 @@ const App = ({ signOut }) => {
   return (
     <View className="App">
       <Heading level={1} textAlign="center" margin="2rem">
-        Image Upload App
+        Image Recognition App
       </Heading>
       <Card variation="elevated" padding="2rem" maxWidth="600px" margin="0 auto">
         <Flex direction="column" gap="1rem" alignItems="center">
